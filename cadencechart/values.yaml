@@ -1,0 +1,195 @@
+# Default values for cadencechart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# values.yaml
+
+ingress:
+  enabled: true
+  tls: false  # or true, depending on whether TLS is enabled
+
+replicaCount: 1
+
+server:
+  image:
+    repository: ubercadence/server
+    tag: master-auto-setup
+    pullPolicy: IfNotPresent
+
+  metrics:
+    annotations:
+      enabled: true
+
+  persistence:
+    secretName: cadence-secret
+    secretKey: password
+
+  frontend:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    service:
+      type: ClusterIP
+      port: 7933
+      annotations: {}
+
+  history:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    service:
+      port: 7934
+      annotations: {}
+
+  matching:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    service:
+      port: 7935
+      annotations: {}
+
+  worker:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    service:
+      port: 7939
+      annotations: {}
+
+cassandra:
+  enabled: true
+  host: cassandra-service.default.svc.cluster.local
+  image:
+    repo: cassandra
+    tag: latest
+    pullPolicy: IfNotPresent
+  config:
+    ports:
+      cql: 9042
+  keyspace: cadence
+  visibility:
+    keyspace: cadence_visibility
+
+mysql:
+  enabled: false
+  host: mysql-service.default.svc.cluster.local
+  service:
+    port: 3306
+  image:
+    repo: mysql
+    tag: latest
+    pullPolicy: IfNotPresent
+
+deployments:
+  frontend:
+    replicaCount: 1
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  history:
+    replicaCount: 1
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  matching:
+    replicaCount: 1
+    podAnnotations: {}
+    podSecurityContext: {}
+    securityContext: {}
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+services:
+  frontend:
+    annotations: {}
+    type: ClusterIP
+    port: 7933
+
+  history:
+    annotations: {}
+    type: ClusterIP
+    port: 7934
+
+  matching:
+    annotations: {}
+    type: ClusterIP
+    port: 7935
+
+  worker:
+    annotations: {}
+    type: ClusterIP
+    port: 7939
