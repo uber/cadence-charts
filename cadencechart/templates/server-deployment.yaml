@@ -1,0 +1,99 @@
+{{- range $service := (list "frontend" "history" "matching" "worker") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cadence-{{ $service }}
+  labels:
+    app: cadence
+    component: {{ $service }}
+spec:
+  replicas: {{ $.Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: cadence
+      component: {{ $service }}
+  template:
+    metadata:
+      labels:
+        app: cadence
+        component: {{ $service }}
+    spec:
+      initContainers:
+        - name: wait-for-schema
+          image: {{ $.Values.image.repository }}:{{ $.Values.image.tag }}
+          command: ["sh", "-c", "
+      until cqlsh {{ $.Values.cassandra.seeds }} 9042 -e \"
+        USE cadence; 
+        SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence';\" | grep -q 0.37 && 
+      cqlsh {{ $.Values.cassandra.seeds }}  9042 -e \"
+        USE cadence_visibility; 
+        SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence_visibility';\" | grep -q 0.9; 
+      do 
+        echo waiting for both cadence and cadence_visibility schema setup; 
+        sleep 10; 
+      done"]
+      containers:
+        - name: cadence-{{ $service }}
+          image: {{ $.Values.image.repository }}:{{ $.Values.image.tag }}
+          ports:
+            - name: port-8000
+              containerPort: 8000
+              protocol: TCP
+            - name: port-8001
+              containerPort: 8001
+              protocol: TCP
+            - name: port-8002
+              containerPort: 8002
+              protocol: TCP
+            - name: port-8003
+              containerPort: 8003
+              protocol: TCP
+            - name: port-7933
+              containerPort: {{ if eq $service "frontend" }}7933{{ else if eq $service "history" }}7934{{ else if eq $service "matching" }}7935{{ else }}7939{{ end }}
+              protocol: TCP
+            - name: port-7833
+              containerPort: 7833
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cadence/config/dynamicconfig/config.yaml
+              subPath: dynamic_config.yaml
+          env:
+            - name: CASSANDRA_SEEDS
+              value: {{ $.Values.cassandra.seeds }} 
+            - name: PROMETHEUS_ENDPOINT_0
+              value: 0.0.0.0:8000
+            - name: PROMETHEUS_ENDPOINT_1
+              value: 0.0.0.0:8001
+            - name: PROMETHEUS_ENDPOINT_2
+              value: 0.0.0.0:8002
+            - name: PROMETHEUS_ENDPOINT_3
+              value: 0.0.0.0:8003
+            - name: DYNAMIC_CONFIG_FILE_PATH
+              value: {{ $.Values.deployment.configPath }}
+            - name: PRIMARY_FRONTEND_SERVICE
+              value: cadence-frontend-service.{{ $.Release.Namespace }}.svc.cluster.local  
+            - name: BIND_ON_IP
+              value: "0.0.0.0"
+            - name: LOG_LEVEL
+              value: {{ $.Values.log.level }}
+            - name: LOG_STDOUT
+              value: {{ $.Values.log.stdout | quote }}
+            - name: ENABLE_ES
+              value: {{ $.Values.deployment.enableES | quote }}
+            - name: SKIP_SCHEMA_SETUP
+              value: {{ $.Values.deployment.skipSchemaSetup | quote }}
+           
+          resources:
+            limits:
+              cpu: {{ $.Values.deployment.cpu.limit }}
+              memory: {{ $.Values.deployment.memory.limit }}
+            requests:
+              cpu: {{ $.Values.deployment.cpu.request }}
+              memory: {{ $.Values.deployment.memory.request }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "cadence.fullname" $ }}
+---
+{{- end }}

@@ -19,7 +19,7 @@ spec:
         - containerPort: 8088
         env:
         - name: CADENCE_TCHANNEL_PEERS
-          value: cadence-service.{{ .Release.Namespace }}.svc.cluster.local:7933
+          value: cadence-frontend-service.{{ .Release.Namespace }}.svc.cluster.local:7933
         
 ---
 apiVersion: v1

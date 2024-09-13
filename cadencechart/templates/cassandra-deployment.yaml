@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cassandra
-        image: cassandra:4.1.1
+        image: {{ .Values.cassandra.image.repository }}:{{ .Values.cassandra.image.tag }}
         ports:
         - containerPort: 9042
         env:
