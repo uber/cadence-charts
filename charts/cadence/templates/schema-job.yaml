@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: cadence-schema-setup
+  labels:
+    {{- include "cadence.commonlabels" . | nindent 4 }}
 spec:
   backoffLimit: 4
   template:
@@ -14,29 +16,30 @@ spec:
         - name: check-cassandra-dns
           image: busybox
           command: ['sh', '-c', '
-            until nslookup {{ $.Values.cassandra.seeds }}; do 
-              echo "Waiting for Cassandra service DNS resolution..."; 
-              sleep 5; 
-            done; 
+            until nslookup  {{ include "cassandra.endpoint" . }}; do
+              echo "Waiting for Cassandra service DNS resolution...";
+              sleep 5;
+            done;
             echo "Cassandra service DNS resolved.";
           ']
         # Check Cassandra readiness using cqlsh
         - name: check-cassandra-ready
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          image: {{ .Values.history.image.repository }}:{{ .Values.history.image.tag }}
+          imagePullPolicy: Always
           command: ['sh', '-c', '
-            until cqlsh {{ $.Values.cassandra.seeds }} 9042 -e "SHOW VERSION"; do 
-              echo "Waiting for Cassandra to start..."; 
-              sleep 30; 
-            done; 
+            until cqlsh {{ include "cassandra.endpoint" . }} 9042 -e "SHOW VERSION"; do
+              echo "Waiting for Cassandra to start...";
+              sleep 30;
+            done;
             echo "Cassandra is up and running.";
           ']
       containers:
         - name: schema-setup
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.history.image.repository }}:{{ .Values.history.image.tag }}
+          imagePullPolicy: Always
           env:
             - name: CASSANDRA_SEEDS
-              value: {{ $.Values.cassandra.seeds }} 
+              value:  {{ include "cassandra.endpoint" . }}
             - name: KEYSPACE
               value: cadence
             - name: VISIBILITY_KEYSPACE
@@ -44,7 +47,7 @@ spec:
             - name: RF
               value: "1"
             - name: CADENCE_HOME
-              value: /etc/cadence 
+              value: /etc/cadence
           args: ['sh', '-c', '
             SCHEMA_DIR=$CADENCE_HOME/schema/cassandra/cadence/versioned;
             cadence-cassandra-tool --ep $CASSANDRA_SEEDS create -k $KEYSPACE --rf $RF;
