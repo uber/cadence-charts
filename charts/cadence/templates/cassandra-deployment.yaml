@@ -1,7 +1,10 @@
+{{- if .Values.cassandra.deployment.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cassandra-deployment
+  labels:
+    {{- include "cadence.commonlabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -14,14 +17,21 @@ spec:
     spec:
       containers:
       - name: cassandra
-        image: {{ .Values.cassandra.image.repository }}:{{ .Values.cassandra.image.tag }}
+        image: {{ .Values.cassandra.deployment.image.repository }}:{{ .Values.cassandra.deployment.image.tag }}
         ports:
         - containerPort: 9042
         env:
         - name: MAX_HEAP_SIZE
-          value: "256M"
+          value: "512M"
         - name: HEAP_NEWSIZE
-          value: "128M"
+          value: "256M"
+        resources:
+          limits:
+            cpu: {{ .Values.cassandra.deployment.cpu.limit }}
+            memory: {{ .Values.cassandra.deployment.memory.limit }}
+          requests:
+            cpu: {{ .Values.cassandra.deployment.cpu.request }}
+            memory: {{ .Values.cassandra.deployment.memory.request }}
         readinessProbe:
           exec:
             command: ["sh", "-c", "cqlsh $(hostname -i) -u cassandra -p cassandra -e 'describe keyspaces'"]
@@ -48,3 +58,4 @@ spec:
   - protocol: TCP
     port: 9042
     targetPort: 9042
+{{- end }}

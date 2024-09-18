@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cadence-web-deployment
+  labels:
+    app: cadence-web
+    {{- include "cadence.commonlabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -15,12 +18,19 @@ spec:
       containers:
       - name: cadence-web
         image: ubercadence/web:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8088
         env:
         - name: CADENCE_TCHANNEL_PEERS
-          value: cadence-frontend-service.{{ .Release.Namespace }}.svc.cluster.local:7933
-        
+          value: cadence-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ $.Values.frontend.port }}
+        resources:
+          limits:
+            cpu: {{ $.Values.web.cpu.limit }}
+            memory: {{ $.Values.web.memory.limit }}
+          requests:
+            cpu: {{ $.Values.web.cpu.request }}
+            memory: {{ $.Values.web.memory.request }}
 ---
 apiVersion: v1
 kind: Service
@@ -33,6 +43,3 @@ spec:
   - protocol: TCP
     port: 8088
     targetPort: 8088
-
-
-

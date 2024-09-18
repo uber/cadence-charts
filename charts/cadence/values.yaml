@@ -1,0 +1,123 @@
+
+log:
+  stdout: true
+  level: "debug"
+
+cassandra:
+  # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
+  endpoint: ""
+  schema:
+    # -- Cassandra schema version of the Cadence keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
+    version: 0.37
+    # -- Cassandra schema version of the Cadence visibility keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
+    visibility_version: 0.9
+  deployment:
+    # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
+    # -- When disabled, the Cassandra deployment is expected to be provided externally. For production use cases, it is recommended to use an external Cassandra deployment.
+    enabled: true
+    image:
+      repository: "cassandra"
+      tag: "4.1.1"
+    cpu:
+      limit: "500m"
+      request: "500m"
+    memory:
+      limit: "1Gi"
+      request: "1Gi"
+
+
+
+
+frontend:
+  # -- Tchannel port of cadence frontend service. DO NOT CHANGE
+  port: 7933
+  # -- GRPC port of cadence frontend service. DO NOT CHANGE
+  grpcPort: 7833
+  # -- Number of frontend replicas to deploy
+  replicas: 2
+  image:
+    # -- Docker image repository to use for the Cadence server
+    repository: "docker.io/ubercadence/server"
+    # -- Docker image tag to use for the Cadence server
+    tag: "master-auto-setup"
+  cpu:
+    limit: "500m"
+    request: "500m"
+  memory:
+    limit: "1Gi"
+    request: "1Gi"
+
+matching:
+  # -- Tchannel port of cadence matching service. DO NOT CHANGE
+  port: 7935
+  # -- GRPC port of cadence matching service. DO NOT CHANGE
+  grpcPort: 7835
+  # -- Number of matching replicas to deploy
+  replicas: 3
+  image:
+    # -- Docker image repository to use for the Cadence server
+    repository: "docker.io/ubercadence/server"
+    # -- Docker image tag to use for the Cadence server
+    tag: "master-auto-setup"
+  cpu:
+    limit: "500m"
+    request: "500m"
+  memory:
+    limit: "1Gi"
+    request: "1Gi"
+
+history:
+  # -- Tchannel port of cadence history service. DO NOT CHANGE
+  port: 7934
+  # -- GRPC port of cadence history service. DO NOT CHANGE
+  grpcPort: 7834
+  # -- Number of history replicas to deploy
+  replicas: 3
+  image:
+    # -- Docker image repository to use for the Cadence server
+    repository: "docker.io/ubercadence/server"
+    # -- Docker image tag to use for the Cadence server
+    tag: "master-auto-setup"
+  cpu:
+    limit: "500m"
+    request: "500m"
+  memory:
+    limit: "1Gi"
+    request: "1Gi"
+
+worker:
+  # -- Tchannel port of cadence worker service. DO NOT CHANGE
+  port: 7939
+  # -- Number of worker replicas to deploy
+  replicas: 1
+  image:
+    # -- Docker image repository to use for the Cadence server
+    repository: "docker.io/ubercadence/server"
+    # -- Docker image tag to use for the Cadence server
+    tag: "master-auto-setup"
+  cpu:
+    limit: "500m"
+    request: "500m"
+  memory:
+    limit: "1Gi"
+    request: "1Gi"
+
+web:
+  replicas: 1
+  image:
+    # -- Docker image repository to use for the Cadence Web UI
+    repository: "docker.io/ubercadence/web"
+    # -- Docker image tag to use for the Cadence Web UI
+    tag: "latest"
+  cpu:
+    limit: "500m"
+    request: "500m"
+  memory:
+    limit: "1Gi"
+    request: "1Gi"
+
+# -- Dynamic config values to be set in the Cadence server. List of keys can be found at https://github.com/uber/cadence/blob/master/common/dynamicconfig/constants.go
+dynamicConfig:
+  values:
+    history.workflowIDExternalRateLimitEnabled:
+      - value: true
