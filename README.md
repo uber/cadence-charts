@@ -20,8 +20,9 @@ This is an early version with known gaps and not production ready yet. Please cr
 Helm's [documentation](https://helm.sh/docs) to get started.
 
 Once Helm has been set up correctly, add the repo as follows:
-
-  helm repo add cadence https://uber.github.io/cadence-charts
+```
+helm repo add cadence https://uber.github.io/cadence-charts
+```
 
 If you had already added this repo earlier, run `helm repo update` to retrieve
 the latest versions of the packages.  You can then run `helm search repo
