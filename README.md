@@ -1,7 +1,8 @@
 # Cadence Charts
 
 This repo contains Cadence helm chart maintained by original Cadence team @Uber.
-This is an early version with known gaps and not production ready yet. Please create an issue explaining your use case and what you would want us to prioritize.
+This is an early version with known gaps and not production ready yet. 
+Please create/upvote an [issue]([url](https://github.com/uber/cadence-charts/issues)) explaining your needs to help us prioritize.
 
 **What is included:**
 - Cadence backend services as separate deployments: frontend, history, matching, worker
@@ -13,6 +14,7 @@ This is an early version with known gaps and not production ready yet. Please cr
 - Metrics integration with Prometheus
 - Custom annotations/labels/tolerations/security context etc.
 - Support for ingress
+
 
 ## Usage
 
