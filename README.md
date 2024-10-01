@@ -5,16 +5,20 @@ This is an early version with known gaps and not production ready yet.
 Please create/upvote an [issue]([url](https://github.com/uber/cadence-charts/issues)) explaining your needs to help us prioritize.
 
 **What is included:**
-- Cadence backend services as separate deployments: frontend, history, matching, worker
-- An ephemeral Cassandra instance
+- Cadence backend services as separate deployments: frontend, history, matching, worker.
+- Customizable replica counts and resource limitations.
+- Customizable dynamic config as a configmap.
+- A single instance ephemeral Cassandra container. This is included so that no external depency is required to get started. Ideally you should have your own external (hosted or managed) DB instance that you can specify in values.yaml.
+- The chart comes with cadence:master-auto-setup as the default image and capable of setting up Cassandra DB schema on first installation.
 
-**What is missing:**
-- Support for advanced visibility store such as Elasticsearch/Pinot
-- Support for databases other than Cassandra
-- Metrics integration with Prometheus
-- Custom annotations/labels/tolerations/security context etc.
+
+What is missing:
+- Support for advanced visibility stores like Elasticsearch or Pinot.
+- Support for persistent plugins configurations besides Cassandra.
+- Support for fully customizable service config via values.yaml.
+- Metrics integration with Prometheus (and more out of the box prometheus dashboards)
+- Custom annotations/lables/tolerations etc.
 - Support for ingress
-
 
 ## Usage
 
